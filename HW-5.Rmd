@@ -1,8 +1,20 @@
 ---
 title: "MATH 216 Homework 5"
-author: "WRITE YOUR NAME HERE"
+author: "Paul Suberu"
 output: html_document
 ---
+
+```{ r, echo=FALSE, message=FALSE, fig.width=12, fig.height=6}
+library(dplyr)
+library(stringr)
+library(tm)
+library(wordcloud)
+library(SnowballC)
+library(tidyr)
+library(shiny)
+library(ggplot2)
+library(ggthemes)
+```
 
 
 ## Admistrative:
@@ -10,8 +22,8 @@ output: html_document
 Please indicate
 
 * Who you collaborated with:
-* Roughly how much time you spent on this HW:
-* What gave you the most trouble:
+* Roughly how much time you spent on this HW:4
+* What gave you the most trouble:Getting the Shiny app to work
 * Any comments you have: 
 
 
@@ -40,7 +52,7 @@ people spinning their wheels on this HW this late in the semester.
 * Consider using `if` and `else` statements to switch out which text to show the
 wordcloud for. Note this isn't the only way to do this. Ex:
 
-```{r}
+```{r, echo=FALSE, message=FALSE, fig.width=12, fig.height=6}
 text <- "blah2"
 if(text == "blah1"){
   value <- 1
@@ -50,5 +62,82 @@ if(text == "blah1"){
   value <- 3
 }
 value
+
+EllenLevis <-readLines("EllenLevis.txt", encoding="UTF-8") %>%
+as.character()
+
+Dawn <-readLines("DawnOfHistory.txt", encoding="UTF-8") %>%
+as.character()
+
+Witchcraft<-readLines("TheWitchcraftDelusion.txt", encoding="UTF-8") %>%
+as.character()
+
+
+EllenLevis <- EllenLevis %>%
+tolower() %>%
+removeNumbers() %>%
+removePunctuation() %>%
+removeWords(stopwords("english")) %>%
+stemDocument() %>%
+stripWhitespace()
+
+
+Dawn<- Dawn %>%
+tolower() %>%
+removeNumbers() %>%
+removePunctuation() %>%
+removeWords(stopwords("english")) %>%
+stemDocument() %>%
+stripWhitespace()
+ 
+
+Witchcraft <- Witchcraft %>%
+tolower() %>%
+removeNumbers() %>%
+removePunctuation() %>%
+removeWords(stopwords("english")) %>%
+stemDocument() %>%
+stripWhitespace()
+
+
+EllenLevis <- VectorSource(EllenLevis) %>% Corpus()
+wordcloud(EllenLevis, scale=c(5,0.5), max.words=25, random.order=FALSE,
+rot.per=0.35, use.r.layout=FALSE, colors=brewer.pal(8, "BuPu"))
+
+
+Dawn <- VectorSource(Dawn) %>% Corpus()
+wordcloud(Dawn, scale=c(5,0.5), max.words=25, random.order=FALSE,
+rot.per=0.35, use.r.layout=FALSE, colors=brewer.pal(8, "BuPu"))
+
+
+Witchcraft <- VectorSource(Witchcraft) %>% Corpus()
+wordcloud(Witchcraft, scale=c(5,0.5), max.words=25, random.order=FALSE,
+rot.per=0.35, use.r.layout=FALSE, colors=brewer.pal(8, "BuPu"))
+
+
+ui <- shinyUI(fluidPage(
+titlePanel("Book Word Clouds"),
+sidebarLayout(
+sidebarPanel(
+selectInput("selection", "Choose a book:",
+choices = c("Dawn", "EllenLevis", "Witchcraft"))
+),
+mainPanel(
+plotOutput("distPlot")
+)
+)
+))
+
+server <- shinyServer(function(input, output) {
+output$distPlot <- renderPlot({
+x <- faithful[, 2] 
+#bins <- seq(min(x), max(x), length.out = input$bins + 1)
+bins <- seq(min(x), max(x), length.out = 1)
+hist(x, breaks = bins, col = 'darkgray', border = 'white')
+})
+})
+shinyApp(ui = ui, server = server)
+library(rsconnect)
+rsconnect::deployApp('path/to/your/app')
 ```
 
